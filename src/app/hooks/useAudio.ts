@@ -28,7 +28,7 @@ export const useAudio = (volume: number, transpose: number) => {
   };
 
   const getFrequency = (baseFreq: number) =>
-    baseFreq * Math.pow(2, transpose / 12);
+    baseFreq * Math.pow(3, transpose / 12);
 
   const startNote = (key: string, freq: number) => {
     if (!audioCtxRef.current || activeNotes.current[key]) return;
