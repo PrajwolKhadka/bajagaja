@@ -16,7 +16,7 @@ export default function key({note, isBlack, active, onStart, onStop}: keyProps){
         onPointerUp={onStop}
         onPointerLeave={onStop}
         onPointerCancel={onStop}
-        className={`${isBlack?
+        className={` select-none ${isBlack?
              `w-8 h-28 bg-black text-white z-10 ${active? "bg-orange-300": "bg-black"}`
              : `w-14 h-48  text-black border flex flex-col justify-end items-center pb-2 ${active? "bg-orange-300": "bg-white"}`
         }`}

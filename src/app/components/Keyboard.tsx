@@ -35,7 +35,7 @@ export default function Keyboard({
   };
   return (
     <div
-      className="relative"
+      className="relative touch-none select-none "
       style={{ width: whiteKeys.length * (WHITE_KEY_WIDTH + 2) }}
     >
       {/* //seto */}
