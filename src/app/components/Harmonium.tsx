@@ -8,9 +8,10 @@ import { useAudio } from "../hooks/useAudio";
 export default function Harmonium() {
   const [transpose, setTranspose] = useState(0);
   const [volume, setVolume] = useState(0.5);
-const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
+  const [octaveShift, setOctave] = useState(0);
+  const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
   const { initAudio, startNote, stopNote, getFrequency, updateVolume } =
-    useAudio(volume, transpose);
+    useAudio(volume, transpose, octaveShift);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -59,7 +60,7 @@ const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [transpose, volume]);
+  }, [transpose, volume, octaveShift]);
 
   return (
     <div className="p-6 bg-yellow-900 rounded-2xl shadow-xl">
@@ -105,7 +106,17 @@ const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
             className="w-full"
           />
         </div>
-
+        <div>
+          <label>Octave: {octaveShift}</label>
+          <input
+            type="range"
+            min="-2"
+            max="2"
+            value={octaveShift}
+            onChange={(e) => setOctave(Number(e.target.value))}
+            className="w-full"
+          />
+        </div>
         <div>
           <label>Volume: {volume.toFixed(2)}</label>
           <input

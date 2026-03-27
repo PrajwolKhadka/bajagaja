@@ -5,7 +5,7 @@ type PlayingNote = {
   gain: GainNode;
 };
 
-export const useAudio = (volume: number, transpose: number) => {
+export const useAudio = (volume: number, transpose: number, octaveShift: number) => {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
   const activeNotes = useRef<Record<string, PlayingNote>>({});
@@ -28,7 +28,7 @@ export const useAudio = (volume: number, transpose: number) => {
   };
 
   const getFrequency = (baseFreq: number) =>
-    baseFreq * Math.pow(3, transpose / 12);
+    baseFreq * Math.pow(2, (transpose + octaveShift * 12)/12 );
 
   const startNote = (key: string, freq: number) => {
     if (!audioCtxRef.current || activeNotes.current[key]) return;
