@@ -10,7 +10,9 @@ export const useInstrument = (
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
   const activeInstrumentRef = useRef<Instrument | null>(null);
-  const currentTypeRef = useRef<InstrumentType>("harmonium");
+  const currentTypeRef = useRef<InstrumentType>("recorder");
+  const instrumentGainRef = useRef(1);
+  const instrumentOctaveOffsetRef = useRef(0);
 
   const initAudio = useCallback(() => {
     if (!audioCtxRef.current) {
@@ -41,6 +43,8 @@ export const useInstrument = (
     instance.init(audioCtxRef.current, masterGainRef.current);
     activeInstrumentRef.current = instance;
     currentTypeRef.current = type;
+    instrumentGainRef.current = def.gain ?? 1;
+    instrumentOctaveOffsetRef.current = def.octaveOffset ?? 0;
   };
 
   const setInstrument = useCallback((type: InstrumentType) => {
@@ -58,14 +62,16 @@ export const useInstrument = (
 
   const getFrequency = useCallback(
     (baseFreq: number) =>
-      baseFreq * Math.pow(2, (transpose + octaveShift * 12) / 12),
+      baseFreq * Math.pow(2, (transpose + octaveShift * 12 + instrumentOctaveOffsetRef.current * 12) / 12),
     [transpose, octaveShift]
   );
 
   const startNote = useCallback(
     (id: string, freq: number) => {
       if (!activeInstrumentRef.current) return;
-      activeInstrumentRef.current.startNote(id, freq, volume);
+       const finalVolume = volume * instrumentGainRef.current;
+
+      activeInstrumentRef.current.startNote(id, freq, finalVolume);
     },
     [volume]
   );

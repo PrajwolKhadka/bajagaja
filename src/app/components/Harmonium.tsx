@@ -3,15 +3,26 @@
 import { useEffect, useState } from "react";
 import { NOTES } from "../utils/notes";
 import Keyboard from "./Keyboard";
-import { useAudio } from "../hooks/useAudio";
+// import { useAudio } from "../hooks/useAudio";
+import { useInstrument } from "../hooks/useInstrument";
+import { InstrumentType } from "../instruments/types";
+import { INSTRUMENT_REGISTRY } from "../instruments";
 
 export default function Harmonium() {
   const [transpose, setTranspose] = useState(0);
   const [volume, setVolume] = useState(0.5);
   const [octaveShift, setOctave] = useState(0);
   const [activeKeys, setActiveKeys] = useState<Set<string>>(new Set());
-  const { initAudio, startNote, stopNote, getFrequency, updateVolume } =
-    useAudio(volume, transpose, octaveShift);
+  const [selectedInstrument, setSelectedInstrument] =
+    useState<InstrumentType>("recorder");
+  const {
+    initAudio,
+    startNote,
+    stopNote,
+    getFrequency,
+    updateVolume,
+    setInstrument,
+  } = useInstrument(volume, transpose, octaveShift);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -27,30 +38,30 @@ export default function Harmonium() {
         //   startNote(id, getFrequency(note.freq));
         // }
         setActiveKeys((prev) => {
-        if (!prev.has(id)) {
-          const newSet = new Set(prev);
-          newSet.add(id);
-          initAudio();
-          startNote(id, getFrequency(note.freq));
-          return newSet;
-        }
-        return prev;
-      });
+          if (!prev.has(id)) {
+            const newSet = new Set(prev);
+            newSet.add(id);
+            initAudio();
+            startNote(id, getFrequency(note.freq));
+            return newSet;
+          }
+          return prev;
+        });
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
-    const note = NOTES.find((n) => n.key === key);
-    if (note) {
-      const id = `${note.note}${note.octave}`;
-      setActiveKeys((prev) => {
+      const note = NOTES.find((n) => n.key === key);
+      if (note) {
+        const id = `${note.note}${note.octave}`;
+        setActiveKeys((prev) => {
           const newSet = new Set(prev);
           newSet.delete(id);
-        stopNote(id);
+          stopNote(id);
           return newSet;
         });
-    }
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -62,12 +73,15 @@ export default function Harmonium() {
     };
   }, [transpose, volume, octaveShift]);
 
+  const handleInstrumentChange = (type: InstrumentType) => {
+    setSelectedInstrument(type);
+    setInstrument(type);
+  };
+
   return (
     <div className="p-6 bg-yellow-900 rounded-2xl shadow-xl">
-      <h1 className="text-xl font-bold mb-4 text-center">
-        BAJAGAJA
-      </h1>
-{/* 
+      <h1 className="text-xl font-bold mb-4 text-center">BAJAGAJA</h1>
+      {/* 
       <Keyboard
         onStart={(key, freq) => {
           initAudio();
@@ -76,7 +90,24 @@ export default function Harmonium() {
         onStop={stopNote}
         getFrequency={getFrequency}
       /> */}
-       <Keyboard
+
+      <div className="mb-4 flex justify-center">
+        <select
+          value={selectedInstrument}
+          onChange={(e) =>
+            handleInstrumentChange(e.target.value as InstrumentType)
+          }
+          className="px-4 py-2 rounded-lg bg-yellow-800 text-white font-semibold border border-yellow-600 cursor-pointer focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        >
+          {INSTRUMENT_REGISTRY.map((inst) => (
+            <option key={inst.id} value={inst.id}>
+              {inst.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <Keyboard
         activeKeys={activeKeys}
         onStart={(key, freq) => {
           setActiveKeys((prev) => new Set(prev).add(key));
@@ -122,18 +153,20 @@ export default function Harmonium() {
           <input
             type="range"
             min="0"
-            max="10"
-            step="0.25"
+            max="1"
+            step="0.025"
             value={volume}
             // onChange={(e) => setVolume(Number(e.target.value))}
-            onChange={(e) => {const v = Number(e.target.value); 
-                setVolume(v); 
-                updateVolume(v);}}
+            onChange={(e) => {
+              const v = Number(e.target.value);
+              setVolume(v);
+              updateVolume(v);
+            }}
             className="w-full"
           />
         </div>
       </div>
-        <div className="mt-8 text-center">
+      <div className="mt-8 text-center">
         <a
           href="https://prajwolkhadka.com.np"
           target="_blank"
